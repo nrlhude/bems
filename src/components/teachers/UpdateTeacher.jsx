@@ -112,7 +112,7 @@ const UpdateTeacher = () => {
                     <Link component={RouterLink} to="/teachers" color="text.primary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
                         Guru
                     </Link>
-                    <Typography color="text.primary">Kemaskini Maklumat Peribadi Guru {teachers.full_name.charAt(0).toUpperCase() + teachers.full_name.slice(1)}</Typography>
+                    <Typography color="text.primary">Kemaskini Maklumat Peribadi Guru {teachers.full_name ? teachers.full_name.charAt(0).toUpperCase() + teachers.full_name.slice(1) : ''}</Typography>
                 </Breadcrumbs>
             </Box>
 
@@ -291,7 +291,7 @@ const UpdateTeacher = () => {
                                         native: true,
                                     }}
                                 >
-                                    <option value="">Select</option>
+                                    <option value="">Status Guru</option>
                                     <option value="Aktif">Aktif</option>
                                     <option value="Tidak Aktif">Tidak Aktif</option>
                                 </TextField>

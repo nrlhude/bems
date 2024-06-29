@@ -19,17 +19,25 @@ const AddRPH = () => {
     const [standardPembelajaran, setStandardPembelajaran] = useState([]);
     const [kesepaduanTunjang, setKesepaduanTunjang] = useState([]);
     const [penerapanNilai, setPenerapanNilai] = useState([]);
+    const [schoolSession, setSchoolSession] = useState([]);
 
     useEffect(() => {
         const fetchKelas = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/kelas-session/');
+                const response = await axios.get('http://127.0.0.1:8000/api/kelass/');
                 setKelasEnrolment(response.data);
             } catch (error) {
                 console.error('Error fetching kelas data:', error);
             }
         };
-
+        const fetchSchoolSession = async () => {
+            try {
+                const response = await axios.get('http://127.0.0.1:8000/api/school-sessions/');
+                setSchoolSession(response.data);
+            } catch (error) {
+                console.error('Error fetching school session data:', error);
+            }
+        };
         const fetchTunjangUtama = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/api/tunjang-utama/');
@@ -85,6 +93,7 @@ const AddRPH = () => {
     
         // Call all fetch functions
         fetchKelas();
+        fetchSchoolSession();
         fetchTunjangUtama();
         fetchFokus();
         fetchStandardKandungan();
@@ -97,6 +106,8 @@ const AddRPH = () => {
         tarikh: yup.date().required("Tarikh is required"),
         masa: yup.string().required("Masa is required"),
         kelas: yup.string().required("Kelas is required"),
+        session_id: yup.string().required("Sesi Persekolahan is required"),
+        tajuk: yup.string().required("Tajuk is required"),
     });
 
     const initialValues = {
@@ -118,14 +129,17 @@ const AddRPH = () => {
         penerapan_nilai: "",
         aktiviti: "",
         refleksi: "",
+        session_id: "",
         // lampiran: null,
     };
 
+    const currentUser = localStorage.getItem('user_id');
     const handleFormSubmit = async (values, { setSubmitting }) => {
-        const data = {
-            ...values,
-        };
         try {
+            const data = {
+                ...values,
+                created_by: currentUser,
+            };
             const response = await axios.post('http://127.0.0.1:8000/api/rph/', data);
             console.log('RPH created:', response.data);
             alert("RPH created successfully!");
@@ -177,8 +191,7 @@ const AddRPH = () => {
                                     onBlur={handleBlur}
                                     error={touched.tarikh && Boolean(errors.tarikh)}
                                     helperText={touched.tarikh && errors.tarikh}
-                                    fullWidth
-                                    margin="normal"
+                                    style={{ margin: '10px', width: '20%' }}
                                     InputLabelProps={{ shrink: true }}
                                 />
                                 <TextField
@@ -190,8 +203,7 @@ const AddRPH = () => {
                                     onBlur={handleBlur}
                                     error={touched.masa && Boolean(errors.masa)}
                                     helperText={touched.masa && errors.masa}
-                                    fullWidth
-                                    margin="normal"
+                                    style={{ margin: '10px', width: '20%' }}
                                     InputLabelProps={{ shrink: true }}
                                 />
                                 <TextField
@@ -203,8 +215,7 @@ const AddRPH = () => {
                                     onBlur={handleBlur}
                                     error={touched.bilangan_murid && Boolean(errors.bilangan_murid)}
                                     helperText={touched.bilangan_murid && errors.bilangan_murid}
-                                    fullWidth
-                                    margin="normal"
+                                    style={{ margin: '10px', width: '10%' }}
                                 />
                                 <TextField
                                     label="Kelas"
@@ -215,13 +226,30 @@ const AddRPH = () => {
                                     onBlur={handleBlur}
                                     error={touched.kelas && Boolean(errors.kelas)}
                                     helperText={touched.kelas && errors.kelas}
-                                    fullWidth
-                                    margin="normal"
+                                    style={{ margin: '10px', width: '20%' }}
                                     SelectProps={{ native: true }}
                                 >
                                     <option value="">Kelas</option>
                                     {kelasEnrolment.map(kelas => (
-                                        <option key={kelas.kelassession_id} value={kelas.kelassession_name}>{kelas.kelassession_name}</option>
+                                        <option key={kelas.kelas} value={kelas.kelas_name}>{kelas.kelas_name}</option>
+                                    ))}
+                                </TextField>
+                                    
+                                <TextField
+                                    label="Sesi Persekolahan"
+                                    name="session_id" 
+                                    select
+                                    value={values.session_id}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    error={touched.session_id && Boolean(errors.session_id)}
+                                    helperText={touched.session_id && errors.session_id}
+                                    style={{ margin: '10px', width: '20%' }}
+                                    SelectProps={{ native: true }}
+                                >
+                                    <option value="">Sesi Persekolahan</option>
+                                    {schoolSession.map(sesi => (
+                                        <option key={sesi.session_id} value={sesi.session_id}>{sesi.session_name}</option>
                                     ))}
                                 </TextField>
 
@@ -233,8 +261,7 @@ const AddRPH = () => {
                                     onBlur={handleBlur}
                                     error={touched.tajuk && Boolean(errors.tajuk)}
                                     helperText={touched.tajuk && errors.tajuk}
-                                    fullWidth
-                                    margin="normal"
+                                    style={{ margin: '10px', width: '47.5%' }}
                                 />
                                 <TextField
                                     label="Tema"
@@ -244,8 +271,7 @@ const AddRPH = () => {
                                     onBlur={handleBlur}
                                     error={touched.tema && Boolean(errors.tema)}
                                     helperText={touched.tema && errors.tema}
-                                    fullWidth
-                                    margin="normal"
+                                    style={{ margin: '10px', width: '47.5%' }}
                                 />
                                 <TextField
                                     label="Tunjang Utama"
@@ -256,13 +282,30 @@ const AddRPH = () => {
                                     onBlur={handleBlur}
                                     error={touched.tunjang_utama && Boolean(errors.tunjang_utama)}
                                     helperText={touched.tunjang_utama && errors.tunjang_utama}
-                                    fullWidth
-                                    margin="normal"
+                                    
+                                    style={{ margin: '10px', width: '47.5%' }}
                                     SelectProps={{ native: true }}
                                 >
                                     <option value="">Tunjang Utama</option>
                                     {tunjangUtama.map(tunjang => (
                                         <option key={tunjang.tunjang_id} value={tunjang.tunjang_name}>{tunjang.tunjang_name}</option>
+                                    ))}
+                                </TextField>
+                                <TextField
+                                    label="Kesepaduan Tunjang"
+                                    name="kesepaduan_tunjang"
+                                    select
+                                    value={values.kesepaduan_tunjang}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    error={touched.kesepaduan_tunjang && Boolean(errors.kesepaduan_tunjang)}
+                                    helperText={touched.kesepaduan_tunjang && errors.kesepaduan_tunjang}
+                                    style={{ margin: '10px', width: '47.5%' }}
+                                    SelectProps={{ native: true }}
+                                >
+                                    <option value="">Kesepaduan Tunjang</option>
+                                    {kesepaduanTunjang.map(kt => (
+                                        <option key={kt.tunjang_id} value={kt.tunjang_name}>{kt.tunjang_name}</option>
                                     ))}
                                 </TextField>
                                 <TextField
@@ -319,24 +362,7 @@ const AddRPH = () => {
                                         <option key={sp.std_pembelajaran_id} value={sp.std_pembelajaran_name}>{sp.std_pembelajaran_name}</option>
                                     ))}
                                 </TextField>
-                                <TextField
-                                    label="Kesepaduan Tunjang"
-                                    name="kesepaduan_tunjang"
-                                    select
-                                    value={values.kesepaduan_tunjang}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    error={touched.kesepaduan_tunjang && Boolean(errors.kesepaduan_tunjang)}
-                                    helperText={touched.kesepaduan_tunjang && errors.kesepaduan_tunjang}
-                                    fullWidth
-                                    margin="normal"
-                                    SelectProps={{ native: true }}
-                                >
-                                    <option value="">Kesepaduan Tunjang</option>
-                                    {kesepaduanTunjang.map(kt => (
-                                        <option key={kt.tunjang_id} value={kt.tunjang_name}>{kt.tunjang_name}</option>
-                                    ))}
-                                </TextField>
+                                
                                 <TextField
                                     label="Pengetahuan Sedia Ada"
                                     name="pengetahuan_sedia_ada"

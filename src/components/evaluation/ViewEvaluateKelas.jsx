@@ -115,7 +115,7 @@ const ViewEvaluateKelas = () => {
                 {params.row.status === 'Evaluated' && (
                     <Button
                         variant="contained"
-                        color="tertiari"
+                        color="tertiary"
                         size="small"
                         sx={{ marginRight: 1 }}
                         onClick={() => createThisStudentReportEvaluation(params.row.studentevaluate_id, params.row.term, params.row.id_student, params.row.evaluate_date, params.row.evaluate_name, params.row.evaluate_id, params.row.kelassession_id)}

@@ -22,6 +22,7 @@ const ViewKelasSession = () => {
     const [peopleKelasLoading, setPeopleKelasLoading] = useState(true);
     const [tabValue, setTabValue] = React.useState(0);
 
+    const currentUserRole = localStorage.getItem('role');
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
@@ -29,6 +30,8 @@ const ViewKelasSession = () => {
     const filteredTeacherPeopleKelas = peopleKelas.filter(item => item.kelassession_id === parseInt(kelassessionId) && item.role === 'GURU');
 
     const filteredStudentPeopleKelas = peopleKelas.filter(item => item.kelassession_id === parseInt(kelassessionId) && item.role === 'PELAJAR');
+
+    const filteredStudentPeopleKelasAktif = peopleKelas.filter(item => item.kelassession_id === parseInt(kelassessionId) && item.role === 'PELAJAR' && item.status === 'Aktif');
 
     useEffect(() => {
         const fetchKelasSession = async () => {
@@ -71,6 +74,7 @@ const ViewKelasSession = () => {
                     id_teacher: item.teacher_id, 
                     id_student: item.student_id, 
                     id_kelassession: item.kelassession_id,
+                    status: item.status,
                     teacher_full_name: teacherNameMap.get(item.teacher_id) || ' ',
                     student_full_name: studentNameMap.get(item.student_id) || ' ',
                     teacher_ic: teacherICMap.get(item.teacher_id) || ' ',
@@ -238,8 +242,9 @@ const ViewKelasSession = () => {
             headerName: "Update Status",
             flex: 1,
             renderCell: (params) => (
-              <Box display="flex" alignItems="center">
-                <Button
+              <Box display="flex" alignItems="center" mt='10px'>
+                    {currentUserRole !== 'PARENT' && params.row.status === 'Tidak Aktif' && (
+                    <Button
                         variant="contained"
                         color="success"
                         size="small"
@@ -248,6 +253,8 @@ const ViewKelasSession = () => {
                     >
                         Aktif
                     </Button>
+                    )}
+                    {currentUserRole !== 'PARENT' && params.row.status === 'Aktif' && (
                     <Button
                         variant="contained"
                         color="error"
@@ -257,6 +264,7 @@ const ViewKelasSession = () => {
                     >
                         Tidak Aktif
                     </Button>
+                    )}
                 </Box>
             )
         },
@@ -265,7 +273,8 @@ const ViewKelasSession = () => {
             headerName: "Actions",
             flex: 1,
             renderCell: (params) => (
-              <Box display="flex" alignItems="center">
+              <Box display="flex" alignItems="center" mt='10px'>
+                {currentUserRole !== 'PARENT' && (
                 <Button
                         variant="contained"
                         color="error"
@@ -275,7 +284,10 @@ const ViewKelasSession = () => {
                     >
                         Remove
                 </Button>
-                <Button
+
+                )}
+                {currentUserRole !== 'PARENT' && (
+                    <Button
                         variant="contained"
                         color="primary"
                         size="small"
@@ -284,6 +296,8 @@ const ViewKelasSession = () => {
                     >
                         View
                     </Button>
+                )}
+                
               </Box>
             ),
           },
@@ -300,7 +314,8 @@ const ViewKelasSession = () => {
             flex: 1,
             renderCell: (params) => (
               <Box display="flex" alignItems="center">
-                <Button
+                {currentUserRole !== 'PARENT' && params.row.status === 'Tidak Aktif' && (
+                    <Button
                         variant="contained"
                         color="success"
                         size="small"
@@ -309,6 +324,8 @@ const ViewKelasSession = () => {
                     >
                         Aktif
                     </Button>
+                )}
+                {currentUserRole !== 'PARENT' && params.row.status === 'Aktif' && (
                     <Button
                         variant="contained"
                         color="error"
@@ -318,7 +335,9 @@ const ViewKelasSession = () => {
                     >
                         Tidak Aktif
                     </Button>
+                )}
                 </Box>
+                
             )
         },
         {
@@ -327,7 +346,7 @@ const ViewKelasSession = () => {
             flex: 1,
             renderCell: (params) => (
               <Box display="flex" alignItems="center">
-                <Button
+                {currentUserRole !== 'PARENT' && (<Button
                         variant="contained"
                         color="primary"
                         size="small"
@@ -336,7 +355,9 @@ const ViewKelasSession = () => {
                     >
                         View
                     </Button>
-                <Button
+                )}
+                {currentUserRole !== 'PARENT' && (
+                    <Button
                         variant="contained"
                         color="error"
                         size="small"
@@ -345,6 +366,7 @@ const ViewKelasSession = () => {
                     >
                         Remove
                 </Button>
+                )}
               </Box>
             ),
           },
@@ -375,7 +397,7 @@ const ViewKelasSession = () => {
                         InputProps={{
                             readOnly: true,
                         }}
-                        style={{ margin: '10px', width: '47%' }}
+                        style={{ margin: '10px', width: '25%' }}
                 />
                 <TextField
                                 name="bilangan_guru"
@@ -395,6 +417,16 @@ const ViewKelasSession = () => {
                                 }}
                                 style={{ margin: '10px', width: '22%' }}
                             />
+                            <TextField
+                                name="bilangan_pelajar_aktif"
+                                label="Bilangan Pelajar Aktif"
+                                value={filteredStudentPeopleKelasAktif.length}
+                                InputProps={{
+                                    readOnly: true,
+                                }}
+                                style={{ margin: '10px', width: '22%' }}
+                            />
+
                 </Box>
                 <Box p="10px" mt="20px">
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="Tabs">
@@ -407,7 +439,9 @@ const ViewKelasSession = () => {
                     <Box m="10px" color="text.primary" >
                     {/* List Student and Teacher in the PeopleKelas for this kelassessionId */}
                     <Typography variant="h6" color={colors.greenAccent[400]} gutterBottom>MAKLUMAT GURU</Typography>
+                    {currentUserRole !== 'PARENT' && (
                     <Box boxShadow={15} p="10px" mt="20px">
+                        
                         <Button
                         variant="contained"
                         color="success"
@@ -422,6 +456,7 @@ const ViewKelasSession = () => {
                         onClick={() => handleSemuaTidakAktifTeacherUpdate()}
                         > Semua Tidak Aktif </Button>
                     </Box>
+                    )}
                     <Box
                                 m="10px"
                                 height="30vh"
@@ -469,6 +504,7 @@ const ViewKelasSession = () => {
                     <Box m="10px" color="text.primary" >
                     {/* List Student and Teacher in the PeopleKelas for this kelassessionId */}
                     <Typography variant="h6" color={colors.greenAccent[400]} gutterBottom>SENARAI PELAJAR</Typography>
+                    {currentUserRole !== 'PARENT' && (
                     <Box boxShadow={15} p="10px" mt="20px">
                         <Button
                         variant="contained"
@@ -484,6 +520,7 @@ const ViewKelasSession = () => {
                         onClick={() => handleSemuaTidakAktifStudentUpdate()}
                         > Semua Tidak Aktif </Button>
                     </Box>
+                    )}
                     <Box
                                 m="10px"
                                 height="75vh"

@@ -26,7 +26,7 @@ const Parents = () => {
         headerName: "Actions",
         flex: 1,
         renderCell: (params) => (
-          <Box display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" mt='10px'>
             <Button
               variant="contained"
               color="primary"
@@ -104,7 +104,7 @@ const Parents = () => {
   useEffect(() => {
     getParents();
   }, []);
-
+  const currentUserRole = localStorage.getItem('role');
 
     return (
       <Box m="10px">
@@ -112,7 +112,8 @@ const Parents = () => {
               title="IBU BAPA" 
               subtitle="Senarai ibu bapa di APCPJ" 
           /> 
-          <Box m="10px 0 0 0">
+          {currentUserRole === 'ADMIN' && (
+            <Box m="10px 0 0 0">
             {/* Add New Button start */}
             <Link to="/register-parent">
 
@@ -132,6 +133,8 @@ const Parents = () => {
             </Link>
             {/* Add New end */}
           </Box>
+          )}
+          
           <Box
             m="10px 0 0 0"
             height="75vh"

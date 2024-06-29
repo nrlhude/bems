@@ -138,7 +138,7 @@ const ReportStudentDetails = () => {
                         <Header title="BUTIRAN LAPORAN PELAJAR" subtitle="" />
                     </Box>
 
-                    <Box boxShadow={10} m="20px 1px">
+                    <Box boxShadow={10} m="20px 10px">
                         <Tabs value={tabValue} onChange={handleTabChange} textColor="primary" indicatorColor="primary">
                             <Tab label="Maklumat Pelajar" />
                             {subtunjang.map((subTunjang, index) => (
@@ -161,6 +161,62 @@ const ReportStudentDetails = () => {
                                     value={studentProfile.full_name || ''}
                                     InputProps={{ readOnly: true }}
                                     style={{ margin: '10px', width: '97%' }}
+                                />
+                                <TextField
+                                    name="student_id"
+                                    label="ID Pelajar"
+                                    value={studentProfile.student_id || ''}
+                                    InputProps={{ readOnly: true }}
+                                    style={{ margin: '10px', width: '23%' }}
+                                />
+                                <TextField
+                                    name="ic_number"
+                                    label="Nombor Kad Pengenalan"
+                                    value={studentProfile.ic_number || ''}
+                                    InputProps={{ readOnly: true }}
+                                    style={{ margin: '10px', width: '23%' }}
+                                />
+                                <TextField
+                                    name="date_of_birth"
+                                    label="Tarikh Lahir"
+                                    value={studentProfile.date_of_birth || ''}
+                                    InputProps={{ readOnly: true }}
+                                    style={{ margin: '10px', width: '23%' }}
+                                />
+                                <TextField
+                                    name="place_of_birth"
+                                    label="Tempat Lahir"
+                                    value={studentProfile.place_of_birth || ''}
+                                    InputProps={{ readOnly: true }}
+                                    style={{ margin: '10px', width: '23%' }}
+                                />
+                                <TextField
+                                    name="age"
+                                    label="Umur"
+                                    value={studentProfile.age || ''}
+                                    InputProps={{ readOnly: true }}
+                                    style={{ margin: '10px', width: '23%' }}
+                                />
+                                <TextField
+                                    name="nationality"
+                                    label="Kewarganegaraan"
+                                    value={studentProfile.nationality || ''}
+                                    InputProps={{ readOnly: true }}
+                                    style={{ margin: '10px', width: '23%' }}
+                                />
+                                <TextField
+                                    name="gender"
+                                    label="Jantina"
+                                    value={studentProfile.gender || ''}
+                                    InputProps={{ readOnly: true }}
+                                    style={{ margin: '10px', width: '23%' }}
+                                />
+                                <TextField
+                                    name="religion"
+                                    label="Agama"
+                                    value={studentProfile.religion || ''}
+                                    InputProps={{ readOnly: true }}
+                                    style={{ margin: '10px', width: '23%' }}
                                 />
                             </Box>
                         </Box>

@@ -27,6 +27,10 @@ const Attendance = () => {
     const [studentAttendance, setStudentAttendance] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    const currentUserRole = localStorage.getItem('role');
+    const currentUserId = localStorage.getItem('user_id');
+
+
     
     const calculateHadir = (attendanceId) => {
         const hadirCount = studentAttendance.filter(item => item.attendance_id === attendanceId && item.status === 'Hadir').length;
@@ -51,16 +55,16 @@ const Attendance = () => {
                 setLoading(true);
     
                 // Fetch both attendance-kelas and student-attendance data
-                const [attendanceResponse, studentAttendanceResponse] = await Promise.all([
+                const [attendanceResponse, studentAttendanceResponse, kelasSessionResponse, peopleKelasResponse] = await Promise.all([
                     axios.get('http://127.0.0.1:8000/api/attendance-kelas/'),
-                    axios.get('http://127.0.0.1:8000/api/student-attendance/')
+                    axios.get('http://127.0.0.1:8000/api/student-attendance/'),
+                    axios.get('http://127.0.0.1:8000/api/kelas-session/'),
+                    axios.get('http://127.0.0.1:8000/api/people-kelas/')
                 ]);
     
                 // Set student attendance data
                 setStudentAttendance(studentAttendanceResponse.data);
     
-                // Fetch kelas-session data
-                const kelasSessionResponse = await axios.get('http://127.0.0.1:8000/api/kelas-session/');
                 const kelasMap = new Map(kelasSessionResponse.data.map(kelas => [kelas.kelassession_id, kelas.kelassession_name]));
     
                 // Map over attendance-kelas data to calculate hadir and tidak_hadir
@@ -77,7 +81,18 @@ const Attendance = () => {
     
                 // Filter data based on the selected input_date
                 const filteredDateData = data.filter((item) => item.attendance_date === input_date);
-                setAttendanceData(filteredDateData);
+                // console.log('filteredDateData', filteredDateData);
+                if (currentUserRole === 'PARENT') {
+                    console.log('######################################');
+                    const filterKelasKids = peopleKelasResponse.data.filter((item) => item.user_id === parseInt(currentUserId));
+                    // console.log('filterKelasKids', filterKelasKids);
+                    
+                    const filteredKidsData = filteredDateData.filter((item) => filterKelasKids.map((kid) => kid.kelassession_id).includes(item.kelassession_id));
+                    // console.log('filteredKidsData', filteredKidsData);
+                    setAttendanceData(filteredKidsData);
+                } else {
+                    setAttendanceData(filteredDateData);
+                }
     
                 setLoading(false);
             } catch (error) {
@@ -103,7 +118,7 @@ const Attendance = () => {
             headerName: "Actions",
             flex: 1,
             renderCell: (params) => (
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" mt='10px'>
                     <Button
                         variant="contained"
                         color="primary"
@@ -158,6 +173,7 @@ const Attendance = () => {
                         onClick={fetchAttendanceData}>
                     Get Attendance
                 </Button> */}
+                { currentUserRole !== 'PARENT' &&(
                 <Button
                     sx={{
                             backgroundColor: colors.blueAccent[700],
@@ -172,7 +188,9 @@ const Attendance = () => {
                     >
                         <AddOutlinedIcon sx={{ mr: "10px" }} />
                         Add New
-                    </Button>
+                </Button>
+                )}
+                
                     
             </Box>
 

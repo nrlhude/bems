@@ -13,19 +13,32 @@ const AddClassReport = () => {
     const [kelasEnrolment, setKelasEnrolment] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    const [schoolSession, setSchoolSession] = useState([]);
+    
+    const currentsession = localStorage.getItem('schoolsessionID');
     useEffect(() => {
         const fetchKelas = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/api/kelas-session/');
-                setKelasEnrolment(response.data);
+                const filtersesi = response.data.filter(kelas => kelas.session_id === parseInt(currentsession));
+                setKelasEnrolment(filtersesi);
                 setLoading(false);
             } catch (error) {
                 setError('Error fetching kelas data');
                 setLoading(false);
             }
         };
+        const fetchSchoolSession = async () => {
+            try {
+                const response = await axios.get('http://127.0.0.1:8000/api/school-sessions/');
+                setSchoolSession(response.data);
+            } catch (error) {
+                console.error('Error fetching school session data:', error);
+            }
+        };
         fetchKelas();
+        fetchSchoolSession();
+        document.title = 'Tambah Laporan Kelas';
     }, []);
 
     const validationSchema = yup.object().shape({
@@ -35,6 +48,7 @@ const AddClassReport = () => {
         kelas: yup.string().required("Kelas is required"),
         tajuk: yup.string().required("Tajuk is required"),
         tema: yup.string().required("Tema is required"),
+        session_id: yup.string().required("Sesi Persekolahan is required"),
     });
 
     const initialValues = {
@@ -46,12 +60,15 @@ const AddClassReport = () => {
         tema: '',
         ulasan_keseluruhan: '',
         cadangan_penambahbaikan: '',
-        dilaporkan_oleh: '',
+        created_by: '',
+        session_id: '',
     };
 
+    const currentUser = localStorage.getItem('user_id');
     const handleFormSubmit = async (values, { setSubmitting }) => {
         const data = {
             ...values,
+            created_by: currentUser,
         };
         try {
             const response = await axios.post('http://127.0.0.1:8000/api/report-class/', data);
@@ -109,7 +126,7 @@ const AddClassReport = () => {
                                     helperText={touched.tarikh && errors.tarikh}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    style={{ margin: '10px', width: '23%' }}
+                                    style={{ margin: '10px', width: '20%' }}
                                     InputLabelProps={{ shrink: true }}
                                 />
                                 <TextField
@@ -122,7 +139,7 @@ const AddClassReport = () => {
                                     helperText={touched.masa && errors.masa}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    style={{ margin: '10px', width: '23%' }}
+                                    style={{ margin: '10px', width: '20%' }}
                                     InputLabelProps={{ shrink: true }}
                                 />
                                 <TextField
@@ -134,7 +151,7 @@ const AddClassReport = () => {
                                     helperText={touched.kehadiran_murid && errors.kehadiran_murid}
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    style={{ margin: '10px', width: '23%' }}
+                                    style={{ margin: '10px', width: '10%' }}
                                 />
                                 <TextField
                                     label="Kelas"
@@ -146,11 +163,28 @@ const AddClassReport = () => {
                                     error={touched.kelas && Boolean(errors.kelas)}
                                     helperText={touched.kelas && errors.kelas}
                                     SelectProps={{ native: true }}
-                                    style={{ margin: '10px', width: '23%' }}
+                                    style={{ margin: '10px', width: '20%' }}
                                 >
                                     <option value="">Kelas</option>
                                     {kelasEnrolment.map(kelas => (
                                         <option key={kelas.kelassession_id} value={kelas.kelassession_name}>{kelas.kelassession_name}</option>
+                                    ))}
+                                </TextField>
+                                <TextField
+                                    label="Sesi Persekolahan"
+                                    name="session_id" 
+                                    select
+                                    value={values.session_id}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    error={touched.session_id && Boolean(errors.session_id)}
+                                    helperText={touched.session_id && errors.session_id}
+                                    style={{ margin: '10px', width: '20%' }}
+                                    SelectProps={{ native: true }}
+                                >
+                                    <option value="">Sesi Persekolahan</option>
+                                    {schoolSession.map(sesi => (
+                                        <option key={sesi.session_id} value={sesi.session_id}>{sesi.session_name}</option>
                                     ))}
                                 </TextField>
                                 <TextField
@@ -194,16 +228,7 @@ const AddClassReport = () => {
                                     helperText={touched.cadangan_penambahbaikan && errors.cadangan_penambahbaikan}
                                     style={{ margin: '10px' , width: '97%' }}
                                 />
-                                <TextField
-                                    label="Dilaporkan oleh"
-                                    name="dilaporkan_oleh"
-                                    value={values.dilaporkan_oleh}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    error={touched.dilaporkan_oleh && Boolean(errors.dilaporkan_oleh)}
-                                    helperText={touched.dilaporkan_oleh && errors.dilaporkan_oleh}
-                                    style={{ margin: '10px' , width: '97%' }}
-                                />
+                                
                             </Box>
 
                             <Box display="flex" justifyContent="flex-end" mt="20px">

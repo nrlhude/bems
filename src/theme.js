@@ -135,8 +135,8 @@ export const themeSettings = (mode) => {
             secondary: {
               main: colors.greenAccent[500],
             },
-            tertiari: {
-              main: colors.blueAccent[500],
+            tertiary: {
+              main: colors.blueAccent[600],
             },
             neutral: {
               dark: colors.grey[700],
@@ -155,8 +155,8 @@ export const themeSettings = (mode) => {
             secondary: {
               main: colors.greenAccent[500],
             },
-            tertiari: {
-              main: colors.blueAccent[500],
+            tertiary: {
+              main: colors.blueAccent[600],
             },
             neutral: {
               dark: colors.grey[700],
@@ -229,7 +229,7 @@ export const ColorModeContext = createContext({
 });
 
 export const useMode = () => {
-  const [mode, setMode] = useState("dark");
+  const [mode, setMode] = useState("light");
 
   const colorMode = useMemo(
     () => ({

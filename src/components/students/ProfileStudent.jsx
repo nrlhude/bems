@@ -33,7 +33,8 @@ const ProfileStudent = () => {
     const [peopleKelas, setPeopleKelas] = useState([]);
     const [peopleKelasLoading, setPeopleKelasLoading] = useState(true);
     const filteredPeopleKelas = peopleKelas.filter(item => item.student_id === parseInt(studentId));
-
+    const currentUserRole = localStorage.getItem('role');
+    const currentSessionName = localStorage.getItem('schoolsessionName');
     useEffect(() => {
         const fetchStudents = async () => {
         try {
@@ -162,7 +163,7 @@ const ProfileStudent = () => {
                     <Box display="flex" justifyContent="center" alignItems="center" flexDirection={{ xs: 'column', md: 'row' }}> {/* Adjusted flexDirection */}
                         <Box mr={{ xs: 0, md: '20px' }} mb={{ xs: '20px', md: 0 }}> {/* Adjusted margin */}
                             <img 
-                                src={`../../assets/user.jpg`}
+                                src={`../../assets/user5.jpg`}
                                 alt="Profile" 
                                 width="200px"
                                 height="200px"
@@ -172,15 +173,12 @@ const ProfileStudent = () => {
                         <Box display="flex" flexDirection="column" justifyContent="center">
                             <Typography variant="h6">Nama: {students.full_name.charAt(0).toUpperCase() + students.full_name.slice(1)}</Typography>
                             <Typography variant="h6">Status: {students.status}</Typography>
-                            <Typography variant="h6">Program: Computer Science</Typography>
-                            <Typography variant="h6">Kelas: A</Typography>
-                            <Typography variant="h6">Sesi: 2024</Typography>
+                            <Typography variant="h6">Sesi: {currentSessionName}</Typography>
                         </Box>
                     </Box>
                 </Box>
 
-                <Box boxShadow={15} p="10px" mt="20px"
-                >
+                <Box boxShadow={15} p="10px" mt="20px" >
                     {/* Tab : Maklumat Peribadi, Maklumat Ibu Bapa, Maklumat Kesihatan, Dokumen */}
 
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="Tabs">
@@ -510,7 +508,8 @@ const ProfileStudent = () => {
                         <Box boxShadow={15} p="10px">
                             {/* TextField : choose kelasEnrollment */}
                             {/* Add New Button start : update database of person_enrolment this studentId */}
-                            <Box m="10px 0 0 0">
+                            {currentUserRole !== 'PARENT' && (
+                                <Box m="10px 0 0 0">
                                 <Button
                                     sx={{
                                         backgroundColor: colors.blueAccent[700],
@@ -523,10 +522,12 @@ const ProfileStudent = () => {
                                     onClick={() => handleAssignKelasStudent(students.id)}
                                 >
                                     <AddOutlinedIcon sx={{ mr: "10px" }} />
-                                    Tambah Kelas
+                                    Add New
                                 </Button>
                             {/* Add New end */}
                             </Box>
+                            )}
+                            
                             <Box
                                 m="10px"
                                 height="75vh"

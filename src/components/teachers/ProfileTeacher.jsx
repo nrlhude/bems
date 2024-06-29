@@ -12,6 +12,7 @@ import { tokens } from "../../theme";
 import { useTheme } from "@mui/material";
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import Parents from '../../scenes/parents';
 
 const ProfileTeacher = () => {
     const theme = useTheme();
@@ -25,6 +26,8 @@ const ProfileTeacher = () => {
 
 
     const filteredPeopleKelas = peopleKelas.filter(item => item.teacher_id === parseInt(teacherId));
+    const filteredPeopleKelasAktif = peopleKelas.filter(item => item.teacher_id === parseInt(teacherId) && item.status === 'Aktif');
+    console.log("filteredPeopleKelasAktif", filteredPeopleKelasAktif);
 
     useEffect(() => {
         const fetchTeachers = async () => {
@@ -120,7 +123,7 @@ const ProfileTeacher = () => {
                     <Link component={RouterLink} to="/teachers" color="text.primary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
                         Guru
                     </Link>
-                    <Typography color="text.primary">Profil Guru {teachers.full_name.charAt(0).toUpperCase() + teachers.full_name.slice(1)}</Typography>
+                    <Typography color="text.primary">Profil Guru - {teachers.full_name ? teachers.full_name.charAt(0).toUpperCase() + teachers.full_name.slice(1) : ''}</Typography>
                     </Breadcrumbs>
                 </Box>
                 <Box m="10px 0 0 20px">
@@ -128,10 +131,22 @@ const ProfileTeacher = () => {
 
                 <Box boxShadow={15} p="10px">
                     {/* Image and details */}
+                    <Box display="flex" justifyContent="end" mr="20px">
+                            {/* Update Button */}
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="secondary"
+                                onClick={() => handleUpdateTeachers(teachers.id)}
+                                sx={{ margin: "10px 20px" }}
+                            >
+                                Kemaskini
+                            </Button>
+                        </Box>
                     <Box display="flex" justifyContent="center" alignItems="center" flexDirection={{ xs: 'column', md: 'row' }}> {/* Adjusted flexDirection */}
                         <Box mr={{ xs: 0, md: '20px' }} mb={{ xs: '20px', md: 0 }}> {/* Adjusted margin */}
                             <img 
-                                src={`../../assets/user.jpg`}
+                                src={`../../assets/user2.jpg`}
                                 alt="Profile" 
                                 width="200px"
                                 height="200px"
@@ -140,10 +155,9 @@ const ProfileTeacher = () => {
                         </Box>
                         <Box display="flex" flexDirection="column" justifyContent="center">
                             {/* Nama, Status, Kelas, Sesi */}
-                            <Typography variant="h6">Nama: {teachers.full_name.charAt(0).toUpperCase() + teachers.full_name.slice(1)}</Typography>
+                            <Typography variant="h6">Nama: {teachers.full_name ? teachers.full_name.charAt(0).toUpperCase() + teachers.full_name.slice(1) : ''}</Typography>
                             <Typography variant="h6">Status: {teachers.status}</Typography>
-                            <Typography variant="h6">Kelas: A</Typography>
-                            <Typography variant="h6">Sesi: 2024</Typography>
+                            <Typography variant="h6">Sesi: {localStorage.getItem('schoolsessionName')}</Typography>
                         </Box>
                     </Box>
                 </Box>
@@ -156,13 +170,6 @@ const ProfileTeacher = () => {
                         <Tab label="Maklumat Peribadi" />
                         <Tab label="Maklumat Kelas" />
                     </Tabs>
-
-                    {/* Action : View Maklumat Peribadi */}
-                    {/* ic_number, first_name, last_name, email, phone_number, address, date_of_birth, age (current year - dob year), nationality (Malaysian/Others), emergency_name, emergency_phone, emergency_relationship, */}
-                    {/* InputProps={{
-                                      readOnly: true,
-                                    }}
-                                    style={{ margin: '20px 0 20px 0' }} */}
                     
                     {/* Tab 1 : Maklumat Peribadi */}
                     {tabValue === 0 && (
@@ -297,18 +304,7 @@ const ProfileTeacher = () => {
                                 style={{ margin: '10px', width: '97%' }}
                             />
                         </Box>
-                        <Box display="flex" justifyContent="end" mt="20px">
-                            {/* Update Button */}
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                color="secondary"
-                                onClick={() => handleUpdateTeachers(teachers.id)}
-                                sx={{ margin: "10px 20px" }}
-                            >
-                                Kemaskini
-                            </Button>
-                        </Box>
+                        
                     </Box>
                     )}
 

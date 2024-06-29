@@ -22,6 +22,8 @@ const ViewAttendanceKelas = () => {
     const [studentAttendance, setStudentAttendance] = useState([]);
     const [studentAttendanceLoading, setStudentAttendanceLoading] = useState(true);
 
+    const currentUserRole = localStorage.getItem('role');
+
     const filteredStudentAttendance = studentAttendance.filter(item => item.attendance_id === parseInt(attendanceKelasId));
 
     useEffect(() => {
@@ -63,6 +65,8 @@ const ViewAttendanceKelas = () => {
         fetchAttendanceKelas();
         fetchStudentAttendance();
     }, [attendanceKelasId]);
+
+    console.log('filteredStudentAttendance:', filteredStudentAttendance);
 
     const handleViewStudent = (studentId) => {
         window.location.href = `/viewprofilestudent/${studentId}`;
@@ -129,18 +133,69 @@ const ViewAttendanceKelas = () => {
             alert('Failed to update Semua Tidak Hadir.');
         }
     };
+    
+
+    // handleUpdateReasonAbsent -> alert box input, update reason absent
+    const handleUpdateReasonAbsent = async (studentAttendanceId, studentId, attendanceId) => {
+        const reason = prompt('Please enter the reason for absence:');
+        if (reason) {
+            try {
+                const response = await axios.put(`http://127.0.0.1:8000/api/student-attendance/${studentAttendanceId}/`, {
+                    status: 'Tidak Hadir',
+                    reasonabsent: reason,
+                    student_id: studentId,
+                    attendance_id: attendanceId
+                });
+                console.log('Response from update reason absent:', response.data);
+                setStudentAttendance(prevState =>
+                    prevState.map(item =>
+                        item.studentattendance_id === studentAttendanceId ? { ...item, reasonabsent:reason } : item
+                    )
+                );
+                alert('Reason for absence updated successfully.');
+            } catch (error) {
+                console.error('Error updating reason for absence:', error);
+                alert('Failed to update reason for absence.');
+            }
+        } else {
+            alert('Reason for absence cannot be empty.');
+        }
+    };
+
+    const [isMyKid, setIsMyKid] = useState({});
+
+    const myKids = async (studentId) => {
+        const parentId = localStorage.getItem('parentId');
+        const studentprofileRes = await axios.get(`http://127.0.0.1:8000/api/studentprofile/${studentId}/`);
+        return studentprofileRes.data.parent_id === parseInt(parentId);
+    };
+
+    useEffect(() => {
+        const checkMyKids = async () => {
+            const myKidsStatus = {};
+            for (const student of filteredStudentAttendance) {
+                myKidsStatus[student.student_id] = await myKids(student.student_id);
+            }
+            setIsMyKid(myKidsStatus);
+        };
+    
+        checkMyKids();
+    }, [filteredStudentAttendance]);
+
 
 
     const columns = [
-        { field: 'student_name', headerName: 'Student Name', flex: 1 },
+        { field: 'student_name', headerName: 'Student Name', flex: 0.5 },
         { field: 'attendance_date', headerName: 'Tarikh', flex: 0.5 },
-        { field: 'status', headerName: 'Status', flex: 1 },
+        { field: 'status', headerName: 'Status', flex: 0.5 },
+        { field: 'reasonabsent', headerName: 'Sebab Tidak Hadir', flex: 0.5 },
         {
             field: "actions",
             headerName: "Actions",
             flex: 1,
             renderCell: (params) => (
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" mt='10px'>
+                    { currentUserRole !== 'PARENT' && params.row.status !== 'Hadir' &&(
                     <Button
                         variant="contained"
                         color="success"
@@ -150,6 +205,8 @@ const ViewAttendanceKelas = () => {
                     >
                         Hadir
                     </Button>
+                    )}
+                    { currentUserRole !== 'PARENT' && params.row.status !== 'Tidak Hadir' &&(
                     <Button
                         variant="contained"
                         color="error"
@@ -158,6 +215,19 @@ const ViewAttendanceKelas = () => {
                     >
                         Tidak Hadir
                     </Button>
+                    )}
+                    {((params.row.status === 'Tidak Hadir' && isMyKid[params.row.student_id]) ||  (params.row.status === 'Tidak Hadir' &&currentUserRole !== 'PARENT')) && (
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        size="small"
+                        onClick={() => handleUpdateReasonAbsent(params.row.studentattendance_id, params.row.student_id, params.row.attendance_id)}
+                        sx={{ marginLeft: 1 }}
+                    >
+                        Update Reason
+                    </Button>
+                    )}
+                    { currentUserRole !== 'PARENT' &&(
                     <Button
                         variant="contained"
                         color="primary"
@@ -167,6 +237,7 @@ const ViewAttendanceKelas = () => {
                     >
                         View Student
                     </Button>
+                    )}
                 </Box>
             ),
         },
@@ -230,8 +301,9 @@ const ViewAttendanceKelas = () => {
 
                         <Box boxShadow={15} p="10px" m="20px">
                             <Typography variant="h6" color={colors.greenAccent[400]} gutterBottom>Senarai Pelajar</Typography>
-
+                            { currentUserRole !== 'PARENT' &&(
                             <Box boxShadow={15} p="10px" mt="20px">
+                            
                                 <Button
                                     variant="contained"
                                     color="success"
@@ -241,6 +313,7 @@ const ViewAttendanceKelas = () => {
                                 >
                                     Semua Hadir
                                 </Button>
+                            
                                 <Button
                                     variant="contained"
                                     color="error"
@@ -249,7 +322,9 @@ const ViewAttendanceKelas = () => {
                                 >
                                     Semua Tidak Hadir
                                 </Button>
+                            
                             </Box>
+                        )}
                             <Box
                                 m="10px"
                                 height="75vh"

@@ -30,11 +30,13 @@ const AddAttendanceKelas = () => {
     const [error, setError] = useState(null);
     const [kelasSession, setKelas] = useState([]);
 
+    const currentsession = localStorage.getItem('schoolsessionID');
     useEffect(() => {
         const fetchKelas = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/api/kelas-session/');
-                setKelas(response.data);
+                const filtersesi = response.data.filter(kelas => kelas.session_id === parseInt(currentsession));
+                setKelas(filtersesi);
             } catch (error) {
                 console.error('Error fetching kelas data:', error);
             }
@@ -43,11 +45,14 @@ const AddAttendanceKelas = () => {
         fetchKelas();
     }, []);
 
+    const currentUser = localStorage.getItem('user_id');
     const handleFormSubmit = async (values, { setSubmitting }) => {
-        const data = {
-            ...values,
-        };
+        
         try {
+            const data = {
+                ...values,
+                created_by: currentUser,
+            };
             const response = await axios.post('http://127.0.0.1:8000/api/attendance-kelas/', data);
             const createdAttendanceKelasId = response.data.attendance_id;
             console.log('Attendance Kelas created:', data);

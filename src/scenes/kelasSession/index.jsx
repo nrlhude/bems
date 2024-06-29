@@ -2,7 +2,7 @@
 // route path : /kelassession
 
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Tab, Tabs, Typography } from "@mui/material";
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
@@ -13,10 +13,20 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 
 const KelasSession = () => {
     const [kelasEnrol, setKelasEnrol] = useState([]);
+    const [kelasSesi, setKelasSesi] = useState([]);
+    const [mykelas, setMyKelas] = useState([]);
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const [loading, setLoading] = useState(false);
     const [peopleKelas, setPeopleKelas] = useState([]);
+
+    const currentSessionID = localStorage.getItem('schoolsessionID');
+    const currentSessionName = localStorage.getItem('schoolsessionName');
+    const currentUserID = localStorage.getItem('user_id');
+    const currentUserRole = localStorage.getItem('role');
+    
+    const [tabValue, setTabValue] = React.useState(0);
+    const handleTabChange = (event, newValue) => { setTabValue(newValue); };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -58,7 +68,17 @@ const KelasSession = () => {
                     setLoading(false);
                 });
 
+                const currentSessionKelas = dataWithIds.filter(item => item.session_id === parseInt(currentSessionID));
+                setKelasSesi(currentSessionKelas);
+                console.log("kelasSesi", kelasSesi);
+
                 setKelasEnrol(dataWithIds);
+
+                const filteredKelas = peopleKelasResponse.data.filter((item) => item.user_id === parseInt(currentUserID));
+                
+                const filteredMyStudentReport = dataWithIds.filter((item) => filteredKelas.some((kelas) => kelas.kelassession_id === parseInt(item.kelassession_id)));
+                setMyKelas(filteredMyStudentReport);
+
                 console.log(dataWithIds);
             } catch (error) {
                 console.error("Error fetching classes data:", error);
@@ -77,7 +97,6 @@ const KelasSession = () => {
     };
 
     const columnsKelasEnrol = [
-        { field: "kelassession_id", headerName: "ID", flex: 0.5, minWidth: 100 },
         { field: "kelassession_name", headerName: "Nama Kelas", flex: 0.5, minWidth: 100 },
         { field: "kelas_name", headerName: "Kelas", flex: 0.5, minWidth: 100 },
         { field: "session_name", headerName: "Sesi Persekolahan", flex: 0.5, minWidth: 100 },
@@ -88,7 +107,7 @@ const KelasSession = () => {
             headerName: "Actions",
             flex: 1,
             renderCell: (params) => (
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" mt='10px'>
                     <Button
                         variant="contained"
                         color="primary"
@@ -119,6 +138,7 @@ const KelasSession = () => {
                 subtitle="Senarai kelas di APCPJ"
             />
             <Box m="10px 0 0 0">
+                {currentUserRole !== 'PARENT' && (
                 <Link to="/createkelassession">
                     <Button
                         sx={{
@@ -134,46 +154,164 @@ const KelasSession = () => {
                         Add New
                     </Button>
                 </Link>
+                )}
             </Box>
-            <Box
-                m="10px 0 0 0"
-                height="75vh"
-                sx={{
-                    "& .MuiDataGrid-root": {
-                        border: "none",
-                    },
-                    "& .MuiDataGrid-cell": {
-                        borderBottom: "none",
-                    },
-                    "& .name-column--cell": {
-                        color: colors.greenAccent[300],
-                    },
-                    "& .MuiDataGrid-columnHeaders": {
-                        backgroundColor: colors.blueAccent[700],
-                        borderBottom: "none",
-                    },
-                    "& .MuiDataGrid-virtualScroller": {
-                        backgroundColor: colors.primary[400],
-                    },
-                    "& .MuiDataGrid-footerContainer": {
-                        borderTop: "none",
-                        backgroundColor: colors.blueAccent[700],
-                    },
-                    "& .MuiCheckbox-root": {
-                        color: `${colors.greenAccent[200]} !important`,
-                    },
-                    "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                        color: `${colors.grey[100]} !important`,
-                    },
-                }}
-            >
-                <DataGrid
-                    rows={kelasEnrol}
-                    columns={columnsKelasEnrol}
-                    getRowId={(row) => row.id}
-                    slots={{ toolbar: GridToolbar }}
-                />
+
+            <Box boxShadow={15} p="10px" mt="20px"
+                >
+
+                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="Tabs">
+                        <Tab label="My Kelas" />
+                        {currentUserRole !== 'PARENT' && (<Tab label="This School Session" /> )}
+                        {currentUserRole !== 'PARENT' && (<Tab label="All" /> )}
+                    </Tabs>
             </Box>
+
+            {tabValue === 0 && (
+                <Box m="10px" color="text.primary" >
+                    
+                    <Box boxShadow={10} p="10px" mt="20px"> 
+                    <Box
+                        m="10px 0 0 0"
+                        height="75vh"
+                        sx={{
+                            "& .MuiDataGrid-root": {
+                                border: "none",
+                            },
+                            "& .MuiDataGrid-cell": {
+                                borderBottom: "none",
+                            },
+                            "& .name-column--cell": {
+                                color: colors.greenAccent[300],
+                            },
+                            "& .MuiDataGrid-columnHeaders": {
+                                backgroundColor: colors.blueAccent[700],
+                                borderBottom: "none",
+                            },
+                            "& .MuiDataGrid-virtualScroller": {
+                                backgroundColor: colors.primary[400],
+                            },
+                            "& .MuiDataGrid-footerContainer": {
+                                borderTop: "none",
+                                backgroundColor: colors.blueAccent[700],
+                            },
+                            "& .MuiCheckbox-root": {
+                                color: `${colors.greenAccent[200]} !important`,
+                            },
+                            "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+                                color: `${colors.grey[100]} !important`,
+                            },
+                        }}
+                    >
+                        <Typography variant="h6" color={colors.greenAccent[400]} gutterBottom>SENARAI KELAS SAYA {currentSessionName}</Typography>
+                        <DataGrid
+                            rows={mykelas}
+                            columns={columnsKelasEnrol}
+                            getRowId={(row) => row.id}
+                            slots={{ toolbar: GridToolbar }}
+                        />
+                    </Box>
+                    </Box>
+                </Box>
+            )}
+
+            {tabValue === 1 && (
+                <Box m="10px" color="text.primary" >
+                    
+                    <Box boxShadow={10} p="10px" mt="20px"> 
+                    <Box
+                        m="10px 0 0 0"
+                        height="75vh"
+                        sx={{
+                            "& .MuiDataGrid-root": {
+                                border: "none",
+                            },
+                            "& .MuiDataGrid-cell": {
+                                borderBottom: "none",
+                            },
+                            "& .name-column--cell": {
+                                color: colors.greenAccent[300],
+                            },
+                            "& .MuiDataGrid-columnHeaders": {
+                                backgroundColor: colors.blueAccent[700],
+                                borderBottom: "none",
+                            },
+                            "& .MuiDataGrid-virtualScroller": {
+                                backgroundColor: colors.primary[400],
+                            },
+                            "& .MuiDataGrid-footerContainer": {
+                                borderTop: "none",
+                                backgroundColor: colors.blueAccent[700],
+                            },
+                            "& .MuiCheckbox-root": {
+                                color: `${colors.greenAccent[200]} !important`,
+                            },
+                            "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+                                color: `${colors.grey[100]} !important`,
+                            },
+                        }}
+                    >
+                        <Typography variant="h6" color={colors.greenAccent[400]} gutterBottom>SENARAI KELAS SESI PERSEKOLAH {currentSessionName}</Typography>
+                        <DataGrid
+                            rows={kelasSesi}
+                            columns={columnsKelasEnrol}
+                            getRowId={(row) => row.id}
+                            slots={{ toolbar: GridToolbar }}
+                        />
+                    </Box>
+                    </Box>
+                </Box>
+            )}
+
+            {tabValue === 2 && (
+                <Box m="10px" color="text.primary" >
+                    
+                    <Box boxShadow={10} p="10px" mt="20px"> 
+                    <Box
+                        m="10px 0 0 0"
+                        height="75vh"
+                        sx={{
+                            "& .MuiDataGrid-root": {
+                                border: "none",
+                            },
+                            "& .MuiDataGrid-cell": {
+                                borderBottom: "none",
+                            },
+                            "& .name-column--cell": {
+                                color: colors.greenAccent[300],
+                            },
+                            "& .MuiDataGrid-columnHeaders": {
+                                backgroundColor: colors.blueAccent[700],
+                                borderBottom: "none",
+                            },
+                            "& .MuiDataGrid-virtualScroller": {
+                                backgroundColor: colors.primary[400],
+                            },
+                            "& .MuiDataGrid-footerContainer": {
+                                borderTop: "none",
+                                backgroundColor: colors.blueAccent[700],
+                            },
+                            "& .MuiCheckbox-root": {
+                                color: `${colors.greenAccent[200]} !important`,
+                            },
+                            "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+                                color: `${colors.grey[100]} !important`,
+                            },
+                        }}
+                    >
+                        <Typography variant="h6" color={colors.greenAccent[400]} gutterBottom>SENARAI SEMUA KELAS</Typography>
+                        <DataGrid
+                            rows={kelasEnrol}
+                            columns={columnsKelasEnrol}
+                            getRowId={(row) => row.id}
+                            slots={{ toolbar: GridToolbar }}
+                        />
+                    </Box>
+                    </Box>
+                </Box>
+            )}
+
+            
         </Box>
     );
 };

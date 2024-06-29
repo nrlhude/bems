@@ -61,12 +61,18 @@ const AddKelasSession = () => {
         num_teacher: 0,
         num_student: 0,
     };
-    
+
+    const currentUser = localStorage.getItem('user_id');
     // Handle form submission
     const handleFormSubmit = async (values, { setSubmitting }) => {
         try {
-        const response = await axios.post('http://127.0.0.1:8000/api/kelas-session/', values);
+        const data = {
+                ...values,
+                created_by: currentUser,
+            };
+        const response = await axios.post('http://127.0.0.1:8000/api/kelas-session/', data);
         console.log(response.data);
+
         alert("Kelas Session created successfully!");
         history('/kelasSession');
         } catch (error) {

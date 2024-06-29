@@ -30,7 +30,8 @@ const UpdateRPH = () => {
         kemahiran_berfikir: '',
         penerapan_nilai: '',
         aktiviti: '',
-        refleksi: ''
+        refleksi: '',
+        session_id: "",
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -42,7 +43,7 @@ const UpdateRPH = () => {
     const [standardPembelajaran, setStandardPembelajaran] = useState([]);
     const [kesepaduanTunjang, setKesepaduanTunjang] = useState([]);
     const [penerapanNilai, setPenerapanNilai] = useState([]);
-
+    const [schoolSession, setSchoolSession] = useState([]);
 
     useEffect(() => {
         const fetchRphDetails = async () => {
@@ -56,10 +57,18 @@ const UpdateRPH = () => {
                 setLoading(false);
             }
         };
+        const fetchSchoolSession = async () => {
+            try {
+                const response = await axios.get('http://127.0.0.1:8000/api/school-sessions/');
+                setSchoolSession(response.data);
+            } catch (error) {
+                console.error('Error fetching school session data:', error);
+            }
+        };
 
         const fetchKelas = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/kelas-session/');
+                const response = await axios.get('http://127.0.0.1:8000/api/kelass/');
                 setKelasEnrolment(response.data);
             } catch (error) {
                 console.error('Error fetching kelas data:', error);
@@ -121,6 +130,7 @@ const UpdateRPH = () => {
 
         // Call all fetch functions
         fetchKelas();
+        fetchSchoolSession();
         fetchTunjangUtama();
         fetchFokus();
         fetchStandardKandungan();
@@ -128,15 +138,20 @@ const UpdateRPH = () => {
         fetchKesepaduanTunjang();
         fetchPenerapanNilai();
         fetchRphDetails();
+        document.title = 'Kemaskini RPH';
     }, [rphID]);
 
+    const currentUser = localStorage.getItem('user_id');
     const handleChange = (e) => {
         const { name, value } = e.target;
         setRphDetails(prevDetails => ({
             ...prevDetails,
-            [name]: value
+            [name]: value,
+            created_by: currentUser,
         }));
     };
+
+    
 
     const handleUpdate = async () => {
         try {
@@ -183,35 +198,49 @@ const UpdateRPH = () => {
                         name="tarikh"
                         value={rphDetails.tarikh}
                         onChange={handleChange}
-                        style={{ margin: '10px', width: '23%' }}
+                        style={{ margin: '10px', width: '20%' }}
                     />
                     <TextField
                         label="Masa"
                         name="masa"
                         value={rphDetails.masa}
                         onChange={handleChange}
-                        style={{ margin: '10px', width: '23%' }}
+                        style={{ margin: '10px', width: '20%' }}
                     />
                     <TextField
                         label="Bilangan Murid"
                         name="bilangan_murid"
                         value={rphDetails.bilangan_murid}
                         onChange={handleChange}
-                        style={{ margin: '10px', width: '23%' }}
+                        style={{ margin: '10px', width: '10%' }}
                     />
                     <TextField
                         label="Kelas"
                         name="kelas" 
                         value={rphDetails.kelas}
                         onChange={handleChange}
-                        style={{ margin: '10px', width: '23%' }}
+                        style={{ margin: '10px', width: '20%' }}
                         select
                         SelectProps={{ native: true }}
                     >
                         <option value="">Kelas</option>
                         {kelasEnrolment.map(kelas => (
-                            <option key={kelas.kelassession_id} value={kelas.kelassession_name}>{kelas.kelassession_name}</option>
+                            <option key={kelas.kelas_id} value={kelas.kelas_name}>{kelas.kelas_name}</option>
                             ))}
+                    </TextField>
+                    <TextField
+                        label="Sesi Persekolahan"
+                        name="session_id" 
+                        select
+                        value={rphDetails.session_id}
+                        onChange={handleChange}
+                        style={{ margin: '10px', width: '20%' }}
+                        SelectProps={{ native: true }}
+                    >
+                        <option value="">Sesi Persekolahan</option>
+                        {schoolSession.map(sesi => (
+                            <option key={sesi.session_id} value={sesi.session_id}>{sesi.session_name}</option>
+                        ))}
                     </TextField>
                 </Box>
                 <Box display="flex" flexWrap="wrap">

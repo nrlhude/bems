@@ -5,123 +5,172 @@ import { Box, Breadcrumbs, Link, Typography, TextField, Button } from "@mui/mate
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { Formik, Form } from "formik";
 import * as yup from "yup";
-import { registerTeacher } from "../../api/auth";
+import axios from "axios";
+import { tokens } from "../../theme";
+import Header from "../../components/Header";
+import { useTheme } from "@mui/material";
 
 const RegisterTeacher = () => {
-  const validationSchema = yup.object().shape({
-    username: yup.string().required("Username is required"),
-    email: yup.string().email("Invalid email").required("Email is required"),
-    password: yup.string().required("Password is required"),
-  });
+    const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
+    const history = useNavigate();
 
-  const navigate = useNavigate();
+    const validationSchema = yup.object({
+        username: yup.string().required("Username is required"),
+        email: yup.string().email("Invalid email").required("Email is required"),
+        first_name: yup.string().required("First name is required"),
+        last_name: yup.string().required("Last name is required"),
+        password: yup.string().required("Password is required").min(8, "Password must be at least 8 characters"),
+        role: yup.string().required("Role is required"),
+    });
 
-  const handleSubmit = async (values, { setSubmitting, setErrors }) => {
-    try {
-      const response = await registerTeacher(values);
-      setSubmitting(false);
-      setErrors({});
-      console.log(response.data);
-      alert("Teacher created successfully!");
-      // window.location.href = `/updateteacher/${teacherId}`; 
-    } catch (error) {
-      console.error("Error registering teacher:", error);
-      if (error.response && error.response.data) {
-        setErrors(error.response.data);
-      } else {
-        setErrors({ general: "Registration failed. Please try again later." });
-      }
-      setSubmitting(false);
-    }
-  };
-  
+    const initialValues = {
+        username: "",
+        email: "",
+        first_name: "",
+        last_name: "",
+        password: "",
+        role: "TEACHER",
+    };
 
-  return (
-    <Box>
-      <Box m="10px 0 0 20px">
-        <Breadcrumbs aria-label="breadcrumb">
-          <Link
-            component={RouterLink}
-            to="/teachers"
-            color="text.primary"
-            sx={{ textDecoration: "none", "&:hover": { textDecoration: "underline" } }}
-          >
-            Teachers
-          </Link>
-          <Typography color="text.primary">Add Teacher</Typography>
-        </Breadcrumbs>
-      </Box>
+    const handleFormSubmit = async (values, { setSubmitting }) => {
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/api/register/', values);
+            console.log(response.data);
 
-      <Box boxShadow={15} p="10px" m="20px">
-        <Formik
-          initialValues={{
-            username: "",
-            email: "",
-            password: "",
-            role: "TEACHER",
-          }}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ values, errors, touched, handleChange, handleBlur, isSubmitting }) => (
-            <Form>
-              <TextField
-                name="username"
-                label="Username"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={values.username}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.username && Boolean(errors.username)}
-                helperText={touched.username && errors.username}
-              />
-              <TextField
-                name="email"
-                label="Email"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={values.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.email && Boolean(errors.email)}
-                helperText={touched.email && errors.email}
-              />
-              <TextField
-                name="password"
-                label="Password"
-                type="password"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={values.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.password && Boolean(errors.password)}
-                helperText={touched.password && errors.password}
-              />
-              <TextField
-                name="role"
-                label="Role"
-                fullWidth
-                variant="outlined"
-                margin="normal"
-                value={values.role}
-                disabled
-              />
-              <Box display="flex" justifyContent="end" m="20px">
-                <Button type="submit" color="secondary" variant="contained" disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Submit"}
-                </Button>
-              </Box>
-            </Form>
-          )}
-        </Formik>
-      </Box>
-    </Box>
-  );
+            const tcRes = await axios.get('http://127.0.0.1:8000/api/teacherprofile/');
+            
+            const findteacherprofile = tcRes.data.find((teacherprofile) => teacherprofile.user === parseInt(response.data.id));
+            console.log(findteacherprofile);
+
+            if(findteacherprofile){
+                history(`/updateteacher/${findteacherprofile.id}`);
+            }
+            else {history('/teachers');}
+
+            alert("Teacher registered successfully!");
+            
+        }
+        catch (error) {
+            console.error('Registration error:', error);
+            if (error.response && error.response.data) {
+                alert(`Registration failed: ${JSON.stringify(error.response.data)}`);
+            } else {
+                alert('An error occurred during registration');
+            }
+        }
+        setSubmitting(false);
+    };
+
+
+    return (
+        <Box>
+            <Box m="10px 0 0 20px">
+                <Breadcrumbs aria-label="breadcrumb">
+                    <Link component={RouterLink} to="/teachers" color="text.primary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                        Guru
+                    </Link>
+                    <Typography color="text.primary">Tambah Guru</Typography>
+                </Breadcrumbs>
+            </Box>
+            <Box m="0 0 0px 20px">
+                <Header title="GURU" subtitle="Tambah Guru" />
+                {/* Formik form */}
+                <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={handleFormSubmit}
+                >
+                {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    isSubmitting,
+                }) => (
+                    <form onSubmit={handleSubmit}>
+                    <TextField
+                        name="username"
+                        label="Username"
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        value={values.username}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.username && Boolean(errors.username)}
+                        helperText={touched.username && errors.username}
+                    />
+                    <TextField
+                        name="email"
+                        label="Email"
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        value={values.email}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.email && Boolean(errors.email)}
+                        helperText={touched.email && errors.email}
+                    />
+                    <TextField
+                        name="first_name"
+                        label="First Name"
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        value={values.first_name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.first_name && Boolean(errors.first_name)}
+                        helperText={touched.first_name && errors.first_name}
+                    />
+                    <TextField
+                        name="last_name"
+                        label="Last Name"
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        value={values.last_name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.last_name && Boolean(errors.last_name)}
+                        helperText={touched.last_name && errors.last_name}
+                    />
+                    <TextField
+                        name="password"
+                        label="Password"
+                        type="password"
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        value={values.password}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.password && Boolean(errors.password)}
+                        helperText={touched.password && errors.password}
+                    />
+                    <TextField
+                        name="role"
+                        label="Role"
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        value={values.role}
+                        disabled
+                    />
+                    <Box display="flex" justifyContent="end" m="20px">
+                        <Button type="submit" color="secondary" variant="contained" disabled={isSubmitting}>
+                        {isSubmitting ? "Submitting..." : "Submit"}
+                        </Button>
+                    </Box>
+                    </form>
+                )}
+                </Formik>
+            </Box>
+        </Box>
+    );
 };
-
 export default RegisterTeacher;

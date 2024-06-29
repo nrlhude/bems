@@ -104,6 +104,7 @@ const Teachers = () => {
     getTeachers();
   }, []);
 
+  const currentUserRole = localStorage.getItem('role');
 
     return (
       <Box m="10px">
@@ -111,6 +112,7 @@ const Teachers = () => {
               title="GURU" 
               subtitle="Senarai guru di APCPJ" 
           /> 
+          {currentUserRole === 'ADMIN' && (
           <Box m="10px 0 0 0">
             {/* Add New Button start */}
             <Link to="/register-teacher">
@@ -131,6 +133,7 @@ const Teachers = () => {
             </Link>
             {/* Add New end */}
           </Box>
+          )}
           <Box
             m="10px 0 0 0"
             height="75vh"

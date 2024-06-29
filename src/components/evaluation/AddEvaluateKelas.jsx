@@ -32,13 +32,15 @@ const AddEvaluateKelas = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [kelasSession, setKelasSession] = useState([]);
+    const currentsession = localStorage.getItem('schoolsessionID');
 
     // Fetching class sessions from API
     useEffect(() => {
         const fetchKelasSessions = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/api/kelas-session/');
-                setKelasSession(response.data);
+                const filtersesi = response.data.filter(kelas => kelas.session_id === parseInt(currentsession));
+                setKelasSession(filtersesi);
             } catch (error) {
                 console.error('Error fetching class sessions:', error);
                 setError('Error fetching data. Please try again later.');
@@ -50,12 +52,25 @@ const AddEvaluateKelas = () => {
         fetchKelasSessions();
     }, []);
 
-    // Handle form submission
+    const currentUserID = localStorage.getItem('user_id');
     const handleFormSubmit = async (values, { setSubmitting }) => {
-        const data = {
-            ...values,
-        };
         try {
+            const kelassessionRes = await axios.get(`http://127.0.0.1:8000/api/kelas-session/${values.kelassession_id}/`);
+
+            const schoolsessionRes = await axios.get('http://127.0.0.1:8000/api/school-sessions/');
+            const schoolsession = schoolsessionRes.data.find(schoolsession => schoolsession.session_id === parseInt(kelassessionRes.data.session_id));
+
+            console.log('Kelas Session:', kelassessionRes.data);
+            console.log('School Session:', schoolsession);
+            console.log('Evaluation Kelas Data:', values);
+            console.log('Current User ID:', currentUserID);
+           
+            const data = {
+                ...values,
+                session_id: schoolsession.session_id,
+                created_by: currentUserID
+            };
+            
             const response = await axios.post('http://127.0.0.1:8000/api/evaluate-kelas/', data);
             const createdEvaluateKelasId = response.data.evaluate_id;
             console.log('Evaluation Kelas created:', data);
@@ -73,7 +88,7 @@ const AddEvaluateKelas = () => {
             <Box m="10px 0 0 20px">
                 <Breadcrumbs aria-label="breadcrumb">
                     <Link component={RouterLink} to="/evaluation" color="text.primary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-                        Pentaksiran
+                        Penilaian
                     </Link>
                     <Typography color="text.primary">Tambah Penilaian Kelas</Typography>
                 </Breadcrumbs>

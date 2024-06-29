@@ -21,6 +21,8 @@ const AssignKelasTeacher = () => {
     const navigate = useNavigate();
     const { teacherId } = useParams();
 
+    const currentUser = localStorage.getItem('user_id');
+
     const validationSchema = yup.object().shape({
         teacher_id: yup.date().required("Guru is required"),
         kelassession_id: yup.string().required("Kelas is required"),
@@ -36,6 +38,7 @@ const AssignKelasTeacher = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [kelasSession, setKelas] = useState([]);
+    const currentsession = localStorage.getItem('schoolsessionID');
 
     useEffect(() => {
         const fetchTeacherDetails = async () => {
@@ -53,7 +56,8 @@ const AssignKelasTeacher = () => {
         const fetchKelas = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/api/kelas-session/');
-                setKelas(response.data);
+                const filtersesi = response.data.filter(kelas => kelas.session_id === parseInt(currentsession));
+                setKelas(filtersesi);
             } catch (error) {
                 console.error('Error fetching kelas data:', error);
             }
@@ -63,20 +67,30 @@ const AssignKelasTeacher = () => {
         fetchKelas();
     }, [teacherId]);
 
+    console.log('teacher', teacher);
+    console.log('teacher.user', teacher.user);
     const handleFormSubmit = async (values, { setSubmitting }) => {
-        const data = {
-            ...values,
-        };
         try {
+            const kelasSessionResponse = await axios.get(`http://127.0.0.1:8000/api/kelas-session/${values.kelassession_id}/`);
+            const sessionId = kelasSessionResponse.data.session_id;
+            const userId = teacher.user;
+            const data = {
+                ...values,
+                session_id: sessionId,
+                created_by: currentUser,
+                user_id: userId,
+            };
+
             const response = await axios.post('http://127.0.0.1:8000/api/people-kelas/', data);
             console.log('Assign Teacher created:', response.data);
-            alert("Assign Teacher created successfully!");
+            alert('Assign Teacher created successfully!');
             window.location.href = `/viewprofileteacher/${teacherId}`;
         } catch (error) {
             console.error('Error creating Assign Teacher:', error.response?.data || error.message);
-            alert("Error creating Assign Teacher. Please try again later.");
+            alert('Error creating Assign Teacher. Please try again later.');
+        } finally {
+            setSubmitting(false);
         }
-        setSubmitting(false);
     };
 
     return (

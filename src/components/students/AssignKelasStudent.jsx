@@ -35,6 +35,7 @@ const AssignKelasStudent = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [kelasSession, setKelas] = useState([]);
+    const currentsession = localStorage.getItem('schoolsessionID');
 
     useEffect(() => {
         const fetchStudentDetails = async () => {
@@ -52,7 +53,8 @@ const AssignKelasStudent = () => {
         const fetchKelas = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/api/kelas-session/');
-                setKelas(response.data);
+                const filtersesi = response.data.filter(kelas => kelas.session_id === parseInt(currentsession));
+                setKelas(filtersesi);
             } catch (error) {
                 console.error('Error fetching kelas data:', error);
             }
@@ -62,15 +64,25 @@ const AssignKelasStudent = () => {
         fetchKelas();
     }, [studentId]);
 
+    console.log('student', student);
+    const currentUser = localStorage.getItem('user_id');
+    console.log('currentUser', currentUser);
     const handleFormSubmit = async (values, { setSubmitting }) => {
-        const data = {
-            ...values,
-        };
         try {
+            const kelasSessionResponse = await axios.get(`http://127.0.0.1:8000/api/kelas-session/${values.kelassession_id}/`);
+            const sessionId = kelasSessionResponse.data.session_id;
+            const parentRes = await axios.get(`http://127.0.0.1:8000/api/parentprofile/${student.parent_id}/`);
+            const userId = parentRes.data.user;
+            const data = {
+                ...values,
+                session_id: sessionId,
+                created_by: currentUser,
+                user_id: userId,
+            };
+            console.log('Assign Student data:', data);
             const response = await axios.post('http://127.0.0.1:8000/api/people-kelas/', data);
             console.log('Assign Student created:', response.data);
             alert("Assign Student created successfully!");
-
             window.location.href = `/viewprofilestudent/${studentId}`;
         } catch (error) {
             console.error('Error creating Assign Student:', error.response?.data || error.message);

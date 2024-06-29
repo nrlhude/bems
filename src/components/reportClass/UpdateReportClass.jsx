@@ -28,6 +28,7 @@ const UpdateClassReport = () => {
     const [error, setError] = useState(null);
 
     const [kelasEnrolment, setKelasEnrolment] = useState([]);
+    const [schoolSession, setSchoolSession] = useState([]);
 
     useEffect(() => {
         const fetchClassReportDetails = async () => {
@@ -39,6 +40,14 @@ const UpdateClassReport = () => {
                 console.error('Error fetching Class Report details:', error);
             } finally {
                 setLoading(false);
+            }
+        };
+        const fetchSchoolSession = async () => {
+            try {
+                const response = await axios.get('http://127.0.0.1:8000/api/school-sessions/');
+                setSchoolSession(response.data);
+            } catch (error) {
+                console.error('Error fetching school session data:', error);
             }
         };
 
@@ -53,13 +62,17 @@ const UpdateClassReport = () => {
 
         fetchKelas();
         fetchClassReportDetails();
+        fetchSchoolSession();
+        document.title = 'Kemaskini Laporan Kelas';
     }, [classreportID]);
 
+    const currentUser = localStorage.getItem('user_id');
     const handleChange = (e) => {
         const { name, value } = e.target;
         setClassReportDetails(prevDetails => ({
             ...prevDetails,
-            [name]: value
+            [name]: value,
+            created_by: currentUser,
         }));
     };
 
@@ -97,12 +110,12 @@ const UpdateClassReport = () => {
                 <Link component={RouterLink} to="/reportClass" color="text.primary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
                     Laporan Kelas
                 </Link>
-                <Typography color="text.primary">Tambah Laporan Kelas</Typography>
+                <Typography color="text.primary">Kemaskini Laporan Kelas</Typography>
                 </Breadcrumbs>
             </Box>
 
             <Box m="0 0 0 20px">
-                <Header title="TAMBAH LAPORAN KELAS" subtitle="" />
+                <Header title="KEMASKINI LAPORAN KELAS" subtitle="" />
                 
                 <Box boxShadow={10} p="10px" mt="20px">
                 <TextField
@@ -110,28 +123,28 @@ const UpdateClassReport = () => {
                         name="tarikh"
                         value={classReportDetails.tarikh}
                         onChange={handleChange}
-                        style={{ margin: '10px', width: '23%' }}
+                        style={{ margin: '10px', width: '20%' }}
                     />
                     <TextField
                         label="Masa"
                         name="masa"
                         value={classReportDetails.masa}
                         onChange={handleChange}
-                        style={{ margin: '10px', width: '23%' }}
+                        style={{ margin: '10px', width: '20%' }}
                     />
                     <TextField
                         label="Kehadiran Murid"
                         name="kehadiran_murid"
                         value={classReportDetails.kehadiran_murid}
                         onChange={handleChange}
-                        style={{ margin: '10px', width: '23%' }}
+                        style={{ margin: '10px', width: '10%' }}
                     />
                     <TextField
                         label="Kelas"
                         name="kelas" 
                         value={classReportDetails.kelas}
                         onChange={handleChange}
-                        style={{ margin: '10px', width: '23%' }}
+                        style={{ margin: '10px', width: '20%' }}
                         select
                         SelectProps={{ native: true }}
                     >
@@ -139,6 +152,20 @@ const UpdateClassReport = () => {
                         {kelasEnrolment.map(kelas => (
                             <option key={kelas.kelassession_id} value={kelas.kelassession_name}>{kelas.kelassession_name}</option>
                             ))}
+                    </TextField>
+                    <TextField
+                        label="Sesi Persekolahan"
+                        name="session_id" 
+                        select
+                        value={classReportDetails.session_id}
+                        onChange={handleChange}
+                        style={{ margin: '10px', width: '20%' }}
+                        SelectProps={{ native: true }}
+                    >
+                        <option value="">Sesi Persekolahan</option>
+                        {schoolSession.map(sesi => (
+                            <option key={sesi.session_id} value={sesi.session_id}>{sesi.session_name}</option>
+                        ))}
                     </TextField>
                     <TextField
                         label="Tajuk"
@@ -168,13 +195,7 @@ const UpdateClassReport = () => {
                         onChange={handleChange}
                         style={{ margin: '10px' , width: '97%' }}
                     />
-                    <TextField
-                        label="Dilaporkan oleh"
-                        name="dilaporkan_oleh"
-                        value={classReportDetails.dilaporkan_oleh}
-                        onChange={handleChange}
-                        style={{ margin: '10px' , width: '97%' }}
-                    />
+                    
                 </Box>
 
                 <Box display="flex" justifyContent="center" mt="20px">

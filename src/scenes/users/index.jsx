@@ -20,25 +20,27 @@ const Users = () => {
 
     const columnsUser = [
         { field: "id", headerName: "ID", flex: 0.5 },
-        { field: "username", headerName: "Username", flex: 1 },
+        { field: "username", headerName: "Username", flex: 0.5 },
         { field: "email", headerName: "Email", flex: 1 },
+        { field: "first_name", headerName: "First Name", flex: 0.5 },
+        { field: "last_name", headerName: "Last Name", flex: 0.5 },
         { 
             field: "password", 
             headerName: "Password", 
-            flex: 1,
+            flex: 0.5,
             renderCell: (params) => maskPassword(params.value) // Mask the password
         },
-        { field: "role", headerName: "Role", flex: 1 },
+        { field: "role", headerName: "Role", flex: 0.5 },
         { 
             field: "last_login", 
             headerName: "Last Login", 
-            flex: 1,
+            flex: 0.5,
             renderCell: (params) => new Date(params.value).toLocaleString() // Format the date
         },
         { 
             field: "date_joined", 
             headerName: "Date Joined", 
-            flex: 1,
+            flex: 0.5,
             renderCell: (params) => new Date(params.value).toLocaleDateString() // Format the date
         },
         {
@@ -82,7 +84,7 @@ const Users = () => {
     };
 
     const handleUpdateUser = (userId) => {
-        window.location.href = `/updateuser/${userId}`;
+        window.location.href = `/updateaccprofile/${userId}`;
     }
 
     const handleDeleteUser = async (userId) => {
@@ -108,7 +110,7 @@ const Users = () => {
                 subtitle="List of all users" 
             /> 
             <Box m="10px 0 0 0">
-                <Link to="/register-user">
+                <Link to="/registeruser">
                     <Button
                         sx={{
                             backgroundColor: colors.blueAccent[700],

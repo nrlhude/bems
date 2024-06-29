@@ -59,7 +59,7 @@ const ProfileParent = () => {
                     full_name: item.full_name,
                     date_of_birth: item.date_of_birth,
                     gender: item.gender,
-                    kelas_name: kelasMap.get(studentKelasMap.get(item.id)) || 'Unknown',
+                    kelas_name: kelasMap.get(studentKelasMap.get(item.id)) || 'Not Assigned',
                 }));
 
                 setChildren(dataWithIds.filter(item => item.parent_id === parseInt(parentId)));
@@ -110,19 +110,20 @@ const ProfileParent = () => {
     ];
 
     
+    const currentSessionName = localStorage.getItem('schoolsessionName');
 
     return (
-        <Box>
-        {loading ? (
-            <Typography>Loading...</Typography>
-        ) : parents ? (
-        <Box>
+            <Box>
+            {loading ? (
+                <Typography>Loading...</Typography>
+            ) : parents ? (
+            <Box>
             <Box m="10px 0 0 20px">
                 <Breadcrumbs aria-label="breadcrumb">
                     <Link component={RouterLink} to="/parents" color="text.primary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
                         Ibu Bapa
                     </Link>
-                    <Typography color="text.primary">Profil Ibu Bapa - {parents.full_name.charAt(0).toUpperCase() + parents.full_name.slice(1)}</Typography>
+                    <Typography color="text.primary">Profil Ibu Bapa - {parents.full_name ? parents.full_name.charAt(0).toUpperCase() + parents.full_name.slice(1) : ''}</Typography>
                 </Breadcrumbs>
             </Box>
 
@@ -146,7 +147,7 @@ const ProfileParent = () => {
                     <Box display="flex" justifyContent="center" alignItems="center" flexDirection={{ xs: 'column', md: 'row' }}> {/* Adjusted flexDirection */}
                         <Box mr={{ xs: 0, md: '20px' }} mb={{ xs: '20px', md: 0 }}> {/* Adjusted margin */}
                             <img 
-                                src={`../../assets/user.jpg`}
+                                src={`../../assets/user6.jpg`}
                                 alt="Profile" 
                                 width="200px"
                                 height="200px"
@@ -154,9 +155,10 @@ const ProfileParent = () => {
                             />
                         </Box>
                         <Box display="flex" flexDirection="column" justifyContent="center">
-                            <Typography variant="h6">Nama: {parents.full_name.charAt(0).toUpperCase() + parents.full_name.slice(1)}</Typography>
+                        <Typography variant="h6">Nama: {parents.full_name ? parents.full_name.charAt(0).toUpperCase() + parents.full_name.slice(1) : ''}</Typography>
                             <Typography variant="h6">Status: {parents.status}</Typography>
                             <Typography variant="h6">Kategori: {parents.category}</Typography>
+                            <Typography variant="h6">Sesi: {currentSessionName}</Typography>
                         </Box>
                     </Box>
                 </Box>
@@ -453,11 +455,11 @@ const ProfileParent = () => {
                 </Box>
 
             </Box>
-        </Box>
-        ) : (
-                <Typography>Ibu Bapa not found.</Typography>
-            )}
-        </Box>
+            </Box>
+            ) : (
+                    <Typography>Ibu Bapa not found.</Typography>
+                )}
+            </Box>
     );
 };
 
